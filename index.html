@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дневник</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* анимация слайда */
+    .form-container {
+      display: flex;
+      width: 200%;
+      transition: transform 0.5s ease-in-out;
+    }
+    .form-box {
+      width: 50%;
+      padding: 2rem;
+    }
+  </style>
+</head>
+<body class="bg-gray-200 min-h-screen p-6 transition-colors duration-300" id="body">
+  <!-- Шапка -->
+  <div class="flex justify-center items-center mb-4 relative">
+    <h1 class="text-2xl font-bold">Дневник</h1>
+    <img src="account.png" onclick="openAccount()" class="absolute right-4 top-0 w-10 h-10 cursor-pointer" alt="Аккаунт">
+  </div>
+
+  <!-- Админ панель -->
+  <div class="flex flex-col items-center mb-6">
+    <button onclick="toggleAdminLogin()" class="px-4 py-2 bg-blue-500 text-white rounded">Админ Панель</button>
+    <div id="adminLogin" class="hidden mt-3 space-x-2 flex justify-center">
+      <input id="adminPassword" type="password" placeholder="Введите пароль" class="border border-gray-500 text-black p-2 rounded focus:outline-none focus:ring focus:ring-blue-300">
+      <button onclick="loginAdmin()" class="px-3 py-1 bg-green-500 text-white rounded">Войти</button>
+    </div>
+  </div>
+
+  <!-- Сетка на 5 дней -->
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <!-- Понедельник -->
+    <div class="bg-gray-800 text-white rounded-2xl shadow-lg border overflow-hidden flex flex-col">
+      <div class="flex border-b border-gray-700">
+        <h2 class="font-bold text-lg text-red-400 p-3 flex-1">Понедельник</h2>
+        <div class="flex items-center border-l border-gray-600 px-3 self-stretch"><span class="font-semibold">ДЗ</span></div>
+      </div>
+      <div class="divide-y divide-gray-700 flex-1" id="mon"></div>
+    </div>
+    <!-- Вторник -->
+    <div class="bg-gray-800 text-white rounded-2xl shadow-lg border overflow-hidden flex flex-col">
+      <div class="flex border-b border-gray-700">
+        <h2 class="font-bold text-lg text-blue-400 p-3 flex-1">Вторник</h2>
+        <div class="flex items-center border-l border-gray-600 px-3 self-stretch"><span class="font-semibold">ДЗ</span></div>
+      </div>
+      <div class="divide-y divide-gray-700 flex-1" id="tue"></div>
+    </div>
+    <!-- Среда -->
+    <div class="bg-gray-800 text-white rounded-2xl shadow-lg border overflow-hidden flex flex-col">
+      <div class="flex border-b border-gray-700">
+        <h2 class="font-bold text-lg text-green-400 p-3 flex-1">Среда</h2>
+        <div class="flex items-center border-l border-gray-600 px-3 self-stretch"><span class="font-semibold">ДЗ</span></div>
+      </div>
+      <div class="divide-y divide-gray-700 flex-1" id="wed"></div>
+    </div>
+    <!-- Четверг -->
+    <div class="bg-gray-800 text-white rounded-2xl shadow-lg border overflow-hidden flex flex-col">
+      <div class="flex border-b border-gray-700">
+        <h2 class="font-bold text-lg text-purple-400 p-3 flex-1">Четверг</h2>
+        <div class="flex items-center border-l border-gray-600 px-3 self-stretch"><span class="font-semibold">ДЗ</span></div>
+      </div>
+      <div class="divide-y divide-gray-700 flex-1" id="thu"></div>
+    </div>
+    <!-- Пятница -->
+    <div class="bg-gray-800 text-white rounded-2xl shadow-lg border overflow-hidden flex flex-col">
+      <div class="flex border-b border-gray-700">
+        <h2 class="font-bold text-lg text-pink-400 p-3 flex-1">Пятница</h2>
+        <div class="flex items-center border-l border-gray-600 px-3 self-stretch"><span class="font-semibold">ДЗ</span></div>
+      </div>
+      <div class="divide-y divide-gray-700 flex-1" id="fri"></div>
+    </div>
+  </div>
+
+  <!-- Окно для ДЗ -->
+  <div id="dzModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-900 dark:text-gray-100 p-6 rounded-2xl shadow-xl w-11/12 max-w-3xl relative">
+      <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✖</button>
+      <h2 class="text-xl font-bold mb-4">Домашнее задание</h2>
+      <div id="dzContent" class="prose max-w-none dark:prose-invert"></div>
+    </div>
+  </div>
+
+  <!-- Окно аккаунта -->
+  <div id="accountModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-900 dark:text-gray-100 rounded-2xl shadow-xl w-11/12 max-w-md relative overflow-hidden">
+      <button onclick="closeAccount()" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✖</button>
+      <div class="flex justify-center space-x-4 mt-4">
+        <button onclick="showAuth()" class="px-4 py-2 bg-blue-500 text-white rounded">Авторизация</button>
+        <button onclick="showReg()" class="px-4 py-2 bg-green-500 text-white rounded">Регистрация</button>
+      </div>
+      <div class="overflow-hidden w-full mt-4">
+        <div id="formContainer" class="form-container">
+          <!-- Авторизация -->
+          <div class="form-box">
+            <h2 class="text-lg font-bold mb-2">Авторизация</h2>
+            <input type="email" placeholder="Email" class="w-full mb-2 p-2 border rounded text-black">
+            <input type="password" placeholder="Пароль" class="w-full mb-2 p-2 border rounded text-black">
+            <button class="w-full bg-blue-500 text-white py-2 rounded">Войти</button>
+          </div>
+          <!-- Регистрация -->
+          <div class="form-box">
+            <h2 class="text-lg font-bold mb-2">Регистрация</h2>
+            <input type="text" placeholder="Ник" class="w-full mb-2 p-2 border rounded text-black">
+            <input type="email" placeholder="Email" class="w-full mb-2 p-2 border rounded text-black">
+            <input type="password" placeholder="Пароль" class="w-full mb-2 p-2 border rounded text-black">
+            <button class="w-full bg-green-500 text-white py-2 rounded">Зарегистрироваться</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Окно для Changelog -->
+  <div id="changelogModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-900 dark:text-gray-100 p-6 rounded-2xl shadow-xl w-11/12 max-w-3xl relative">
+      <button onclick="closeChangelog()" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">✖</button>
+      <h2 class="text-xl font-bold mb-4">Changelog</h2>
+      <pre class="whitespace-pre-wrap text-sm">[+] Mini-Chat
+[+] Admin Panel
+[+] Switch Theme
+...
+[/] Улучшили ChinaHat</pre>
+    </div>
+  </div>
+
+  <!-- Переключатель темы -->
+  <div class="fixed bottom-4 left-4">
+    <div id="themeToggle" onclick="toggleTheme()" class="w-16 h-8 flex items-center bg-gray-400 dark:bg-gray-600 rounded-full p-1 cursor-pointer transition">
+      <div id="themeCircle" class="w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center transition-transform duration-300">
+        <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15a5 5 0 100-10 5 5 0 000 10z"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Changelog ссылка -->
+  <div class="fixed bottom-2 right-4 text-gray-500 text-sm text-right">
+    <a href="#" onclick="openChangelog()" class="text-sky-500 hover:text-sky-600 underline">Changelog</a>
+  </div>
+
+  <!-- Звуки -->
+  <audio id="soundEnable" src="enable.wav" preload="auto"></audio>
+  <audio id="soundDisable" src="disable.wav" preload="auto"></audio>
+
+  <script>
+    let isAdmin = false;
+    let dark = false;
+
+    const lessons = {
+      mon: ["Алгебра","РОВ","Химия","География","Английский язык","Физика","Биология"],
+      tue: ["Геометрия","Теория вероятности","ФК","История","Русский язык","Литература"],
+      wed: ["Английский язык","ФК","Русский язык","Алгебра","География","ИКТ"],
+      thu: ["Физика","Геометрия","Музыка","Химия","Литература","Русский язык"],
+      fri: ["Общество","Технология","Алгебра","Английский язык","Биология","ОБЖ","История"]
+    };
+
+    function toggleAdminLogin() {
+      document.getElementById('adminLogin').classList.toggle('hidden');
+    }
+    function loginAdmin() {
+      const passField = document.getElementById('adminPassword');
+      const pass = passField.value;
+      if (pass === '7777') {
+        isAdmin = true;
+        alert('Вы вошли как админ');
+        document.querySelectorAll('.adminBtn').forEach(btn => btn.classList.remove('hidden'));
+        document.getElementById('adminLogin').classList.add('hidden');
+      } else {
+        alert('Неверный пароль');
+      }
+      passField.value = "";
+    }
+
+    function editHW(button, subject) {
+      const dz = prompt(`Введите ДЗ для: ${subject}`);
+      if (dz) {
+        localStorage.setItem(subject, dz);
+        renderAll();
+      }
+    }
+    function autoLink(text) {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return text.replace(urlRegex, url => `<a href="${url}" target="_blank" class="text-sky-500 underline decoration-sky-500 hover:text-sky-600 hover:decoration-sky-600 transition">${url}</a>`);
+    }
+    function openModal(dz) {
+      const content = dz && dz.trim() ? autoLink(dz) : '<em>ДЗ пока нет</em>';
+      document.getElementById('dzContent').innerHTML = content;
+      document.getElementById('dzModal').classList.remove('hidden');
+    }
+    function closeModal() { document.getElementById('dzModal').classList.add('hidden'); }
+
+    function openChangelog() { document.getElementById('changelogModal').classList.remove('hidden'); }
+    function closeChangelog() { document.getElementById('changelogModal').classList.add('hidden'); }
+
+    function renderLessons(containerId, list) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      list.forEach(subject => {
+        const dz = localStorage.getItem(subject) || '';
+        const div = document.createElement('div');
+        div.className = 'flex justify-between items-center p-2';
+        div.innerHTML = `<span>${subject}</span>
+          <div class="flex space-x-2 items-center">
+            <span class="cursor-pointer" title="Показать ДЗ" onclick='openModal(${JSON.stringify(dz)})'>📝</span>
+            <button class="hidden adminBtn text-sm text-gray-300" onclick="editHW(this, '${subject}')">✏️</button>
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+    function renderAll() {
+      renderLessons('mon', lessons.mon);
+      renderLessons('tue', lessons.tue);
+      renderLessons('wed', lessons.wed);
+      renderLessons('thu', lessons.thu);
+      renderLessons('fri', lessons.fri);
+      if (isAdmin) document.querySelectorAll('.adminBtn').forEach(btn => btn.classList.remove('hidden'));
+    }
+
+    function applyTheme(playSound = false) {
+      const body = document.getElementById('body');
+      const circle = document.getElementById('themeCircle');
+      const icon = document.getElementById('themeIcon');
+      const sndOn = document.getElementById('soundEnable');
+      const sndOff = document.getElementById('soundDisable');
+      if (dark) {
+        body.classList.add('dark','bg-gray-900','text-gray-100');
+        circle.style.transform = 'translateX(32px)';
+        icon.outerHTML = '<svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>';
+        if (playSound) { try { sndOn.currentTime = 0; sndOn.play(); } catch(e){} }
+      } else {
+        body.classList.remove('dark','bg-gray-900','text-gray-100');
+        body.classList.add('bg-gray-200');
+        circle.style.transform = 'translateX(0)';
+        icon.outerHTML = '<svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15a5 5 0 100-10 5 5 0 000 10z"/></svg>';
+        if (playSound) { try { sndOff.currentTime = 0; sndOff.play(); } catch(e){} }
+      }
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+    }
+    function toggleTheme() { dark = !dark; applyTheme(true); }
+
+    function openAccount() { document.getElementById('accountModal').classList.remove('hidden'); }
+    function closeAccount() { document.getElementById('accountModal').classList.add('hidden'); }
+    function showAuth() { document.getElementById('formContainer').style.transform = 'translateX(0%)'; }
+    function showReg() { document.getElementById('formContainer').style.transform = 'translateX(-50%)'; }
+
+    window.onload = () => {
+      renderAll();
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') dark = true;
+      applyTheme(false);
+    }
+  </script>
+</body>
+</html>
